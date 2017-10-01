@@ -3,7 +3,29 @@
 DEBUG = False
 import sys
 
-"""Custom input
+"""
+This solves Bob's Game - although optimized with alphabeta pruning, the approach turns out to be quite slow.
+
+I should have realized this from the intuition before dumping hours into it.
+
+Hindsight Reflecting and Lessons Learned:
+1. Is Chess a solved game with alphabeta pruning? No it's not. So why would you expect that technique to work for a game of similar search depth and branches from each path? Since this problem requires making the optimal move, not a good move based on heuristics (as chess algorithms currently do), this problem is unsolvable with this technique.
+
+2. Play with the game more before coding.
+
+3. Dynamic programming and alphabeta pruning below were great optimizations, but the overall algorithm approach was the biggest bottleneck. Focus on the biggest impact piece (spending more time clearly identifying it can be very useful...)
+
+4. At least got it working!
+
+5. If the problem is unknown (sort of, was familiar with Chess and checkers), seek out similar known good solutions first. Although balance this with re-inventing the wheel. Re-inventing the wheel is a good skill to have because for some re-inventions, it turns out there never was an invention! Re-inventing the wheel builds problem solving skills.
+
+Steps Forward:
+1. Seek out similar games (impartial games) and study solutions to them. Is there a way to convert this to a nimsum game?
+
+2. Re-program this using new method
+
+"""
+"""Custom input, this passes
 5
 3
 X.X
@@ -20,6 +42,25 @@ XXXX
 KXKK
 XX.X
 XX.K
+"""
+
+"""
+This input is currently failing
+1
+5
+KKKKK
+KKKKK
+KKKKK
+KKKKK
+KKKKK
+
+1
+4
+KKKK
+KKKK
+KKKK
+KKKK
+
 """
 
 winnable_d = {}  # Maps from board tuple to current player's status on the board: "WIN", "LOSS", or "UNKNOWN" e.g. format of {((1,0),(-1,-1)):"WIN"}
