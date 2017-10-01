@@ -1,2 +1,3 @@
 # HackerRank
-Noteworthy HackerRank problems
+Noteworthy HackerRank :sparkles: :camel: :boom: Problems
+
