@@ -1,121 +1,72 @@
 #!/bin/python3
 
 import sys
+import copy
 
-global propdict
-propdict = {}  # global maps id to (depth, number of subnodes including itself)
+nd = {}  # id: [list of ids]
+traveled = {1}  # set of ids traveled to already
 
-class Node:
-    def __init__(self, id):
-        self.id = id
-        self.children = []
-        self.parent = None
-
-    def setpNode(self, parentNode):
-        self.parent = parentNode
-
-    def addcNode(self, childNode):
-        # print("adding child to:", self.id, "child:", childNode.id)
-        self.children.append(childNode)
-
-    def childrenids(self):
-        l = []
-        for c in self.children:
-            l.append(c.id)
-        return l
+# TO sum up individual pieces
+# The end will take EV / weighted_total for the answer
+weighted_total = 0  # add the depths all up
+EV = 0  # Add the (depth * nodes_remain) all up
 
 
-def subnodes(node, depth):
-    # recursively figure out number of subnodes (including itself)
-    # Intended to be called with head node with depth=0 to fill propdict
-    global propdict
-    print("inner propdict at node id:", node.id, propdict)
-    print("node.childrenids:", node.childrenids())
+def nodes_under(n=1, depth=0):
+    # recursively expand upon id = n, intended to be called on head n == 1, depth == 1 the first time around
+    global EV
+    global weighted_total
+    global traveled
+    global nd
+    total_nodes = len(nd)
 
-    if not node.children:
-        propdict[node.id] = (depth, 1)
-        return 1  # base case
-    else:
-        sum = 1  # 1 to include the current node
-        for child in node.children:
-            # print("Node, Children:", node.id, node.childrenids())
-            sum += subnodes(child, depth + 1)
-        propdict[node.id] = (depth, sum)
-        return sum
+    downward_children = []
+    for id in nd[n]:
+        if id not in traveled:
+            downward_children.append(id)
+            traveled.add(id)
+    # print("downard children of id {}: {}".format(n, downward_children))
+    if len(downward_children) == 0:
+        # print("Adding contribution from node id:", n)
+        # print("EV:{}, weighted_total:{}".format(depth * (total_nodes - 1), depth))
+        EV += depth * (total_nodes - 1)
+        weighted_total += depth
+        return 1
+
+    subnodescnt = 1
+    for id in downward_children:
+        subnodescnt += nodes_under(n=id, depth=depth + 1)
+    # print("n and its children:", n, downward_children)
+    # print("node count under n:", n, subnodescnt)
+    # print("nodes remaining after cutting {}: {}".format(n, total_nodes - (subnodescnt)))
+    EV += depth * (total_nodes - (subnodescnt))
+    weighted_total += depth
+    return subnodescnt
 
 
 if __name__ == "__main__":
     n = int(input().strip())
-    nodelist = []
-    nodedict = {}  # map id num to Node
     for a0 in range(n - 1):
         x, y = input().strip().split(' ')
         x, y = [int(x), int(y)]
 
         # Write Your Code Here
-
-        # flip the order if x is bigger than y because duct tape is instant fix
-        if x > y:
-            t = y
-            y = x
-            x = t
-
-        if x == 1:
-            print("x1, y", y)
-        if x == 449:
-            print("x449, y", y)
-        if x == 485:
-            print("x485, y", y)
-        if x == 2:
-            print("x2, y", y)
-        if x == 46:
-            print("x46, y", y)
-        if x not in nodedict:
-            currentNode = Node(x)
-            nodedict[x] = currentNode
+        if x in nd:
+            nd[x].append(y)
         else:
-            currentNode = nodedict[x]
-
-        if y not in nodedict:
-            childNode = Node(y)
-            nodedict[y] = childNode
+            nd[x] = [y]
+        if y in nd:
+            nd[y].append(x)
         else:
-            childNode = nodedict[y]
+            nd[y] = [x]
 
-        currentNode.addcNode(childNode)
-        childNode.setpNode(currentNode)
+    # print(nd)
+    nodes_under()
+    # print(EV)
+    # print(weighted_total)
+    print(EV / weighted_total)
+    # print(nd)
+    # print(traveled)
 
-        if x == 1:
-            Head = currentNode
+    # feed first node into recursive algorithm
 
-    # Do work
-    # Find depths of all the nodes, find total number of nodes
-    # Find total number of nodes under each node
-    # Calculate probability / exp value from the depths
-    expvalsum = 0
-    weightedcount = 0  # count of nodes that is also weighted
-    total_nodes = subnodes(Head, 0)
-    # print("propdict", propdict)
-    # print("nodedict", nodedict)
-
-    # propdict : (depth, subsum of nodes)
-    dictkeys = []
-    childnodekeys = []
-    for o in nodedict:
-        dictkeys.append(nodedict[o].id)
-        for child in nodedict[o].children:
-            childnodekeys.append(child.id)
-
-    # print(dictkeys)
-    # print("sorted:", sorted(dictkeys)) # dictkeys looks good, problem with propdict then
-    # print(sorted(childnodekeys)) # childnode keys look good
-    # print("len chidnodekeys", len(childnodekeys)) # is 499 so good here
-    print("propdict:", propdict)
-    for id in nodedict.keys():
-        if id == 1:
-            continue
-        remaining_nodes = total_nodes - propdict[id][1]
-        expvalsum += propdict[id][0] * remaining_nodes
-        weightedcount += propdict[id][0]
-
-    print(expvalsum / weightedcount)
