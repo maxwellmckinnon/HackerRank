@@ -1,4 +1,5 @@
 #!/bin/python3
+# Works but maxes out the recursion depth for big input :D :D
 
 import sys
 import copy
